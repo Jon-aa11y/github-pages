@@ -1,0 +1,178 @@
+# Instalación automática de shiny si no está instalado
+if (!require("shiny")) {
+  install.packages("shiny", dependencies = TRUE)
+  library(shiny)
+}
+
+# Cargar librerías necesarias
+library(shiny)
+
+# Interfaz de usuario
+ui <- fluidPage(
+  tags$head(
+    tags$style(HTML(
+      "body { background-color: #eaf2f8; } \n      h3, h4 { color: #2c3e50; } \n      .btn { background-color: #2980b9; color: white; }"
+    ))
+  ),
+  
+  # Portada
+  titlePanel("Simulador interactivo: Llenado del Certificado de Defunción"),
+  fluidRow(
+    column(4, img(src = "ssjlogo5.jpeg", height = "100px")),
+    column(4, h3("OPD Servicios de Salud Jalisco"),
+           h4("Dr. Héctor Hugo Bravo Hernández - Director General del O.P.D. Servicios de Salud Jalisco"),
+           h4("Mtra. María Elena Masini Casillas - Directora de Planeación Institucional"),
+           h4("Dr. Javier Jhovany Jorge Duran González - Director del Centro Regional de Capacitación de la Clasificación de Enfermedades y Estadísticas"),
+           h4("Instructor: Rubén Sandoval Gloria - Coordinador del Centro Regional de Capacitación de la Clasificación de Enfermedades y Estadísticas"),
+           h4("Lic. Jonathan Juárez Sandoval - Coordinador de Información e Inteligencia de Datos en Salud")),
+    column(4, img(src = "cerecce.png", height = "100px"))
+  ),
+  br(),
+  actionButton("start", "Iniciar Llenado del Certificado", class = "btn"),
+  br(),
+  br(),
+  
+  # Formulario interactivo
+  uiOutput("formulario"),
+  
+  # Cargar firma electrónica
+  p("Cargar Firma Electrónica (Ficticio para práctica)"),
+  actionButton("cargar_firma", "Cargar Firma Electrónica", class = "btn"),
+  br(),
+  br(),
+  
+  # Simulación de impresión
+  actionButton("confirmar", "Confirmar Certificado", class = "btn"),
+  uiOutput("certificado_final")
+)
+
+# Lógica del servidor
+server <- function(input, output, session) {
+  
+  observeEvent(input$start, {
+    output$formulario <- renderUI({
+      tagList(
+        h3("Certificado de Defunción"),
+        h4("1. Datos de la (del) Fallecida/o"),
+        textInput("nombre_fallecido", "Nombres"),   
+        textInput("apellido_paterno", "Apellido paterno"), 
+        textInput("apellido_materno", "Apellido materno"), 
+        dateInput("fecha_nacimiento", "Fecha de Nacimiento"),
+        selectInput("sexo", "Sexo", choices = c("Masculino", "Femenino", "Se ignora","No especificado")),
+        selectInput("entidad_nacimiento", "Entidad de nacimiento", choices = c("Guadalajara", "México", "Campeche","Nuevo Leon")),
+        textInput("curp", "CURP"),
+        selectInput("afrodescendiente", "Se le conocia como afroamexicano", choices = c("Si", "No", "Se ignora","No especificado")),
+        selectInput("indigena", "Se considera indigena", choices = c("Si", "No", "Se ignora")),
+        selectInput("lengua_indigena", "Habla una lengua indigena", choices = c("Si", "No", "Se ignora")),
+        selectInput("nacionalidad", "Nacionalidad", choices = c("Mexicano", "Otra nacionalidad", "Se ignora")),
+        textInput("edad_cumplida", "Edad cumplida"),
+        textInput("folio_certificado", "Folio para un certificado de nacimiento"),
+        textInput("semanas_gestacion", "Semanas de gestación"),
+        textInput("peso_nacer", "Peso al nacer (gramos)"),
+        selectInput("situacion_conyugal", "Situación conyugal", choices = c("Soltera/o", "En Unión libre", "Casada/o", "Separada/o","Divorciada/o","Viuda/o", "Se ignora")),
+        textInput("residencia_habitual", "Residencia habitual"),
+        selectInput("tipo_vialidad", "Tipo de vialidad", choices = c("Avenida", "Boulevard", "Calzada", "Circuito","Corredor","Eje vial", "Periférico")),
+        textInput("nombre_vialidad", "Nombre de la vialidad"),
+        textInput("numero_exterior", "Número Exterior"),
+        textInput("numero_interior", "Número Interior"),
+        selectInput("tipo_asentamiento", "Tipo de asentamiento humano", choices = c("Aeropuerto", "Ampliación", "Barrio", "Cantón","Ciudad","Granja", "Hacienda")),
+        textInput("nombre_asentamiento", "Nombre del asentamiento humano"),
+        textInput("codigo_postal", "Código Postal"),
+        textInput("localidad", "Localidad"),
+        textInput("municipio", "Municipio o alcaldía"),
+        selectInput("entidad_federativa", "Entidad Federativa", choices = c("Guadalajara", "Baja California", "Nicaragua", "Yucatán","Chihuahua","Se ignora")),
+        selectInput("escolaridad", "Escolaridad", choices = c("Ninguna", "Primaria", "Bachillerato o prepa", "Posgrado","Preescolar","Secundaria", "Se ignora")),
+        textInput("ocupacion", "Ocupación Habitual"),
+        selectInput("trabajaba", "Trabajaba", choices = c("Si", "No", "Se ignora")),
+        selectInput("afiliacion_salud", "Afiliación a servicios de salud", choices = c("IMMS", "ISSSTE", "Ninguna", "IMMS Bienestar","Se ignora","Otra")),
+        textInput("numero_seguridad_social", "Número de seguridad social"),
+        h4("2. Datos de la (del) Informante"),
+        textInput("nombre_informante", "Nombre informante"),
+        textInput("apellido_paterno_informante", "Apellido paterno"),
+        textInput("parentesco", "Parentesco"),
+        h4("3. Datos de la Defunción"),
+        selectInput("Sitio donde sucedio la defunción", "Sitio donde sucedio la defunción", choices = c("Secretaría de Salud", "IMSS Bienestar", "ISSSTE", "PEMEX","Se ignora","Otra Unidad Médica","Vía Pública")),
+        textInput("Nombre de la Unidad Médica", "Nombre de la Unidad Médica"),
+        textInput("Clave Unica de la Unidad", "SSJ19480898"),
+        textInput("Domicilio dónde sucedió la Defunción", "Domicilio donde sucedio la defunción"),
+        textInput("Tipo de vialidad", "Tipo de Vialidad"),
+        textInput("Nombre de la vialidad", "Nombre de la Vialidad"),
+        textInput("numero_exterior", "Número Exterior"),
+        textInput("numero_interior", "Número Interior"),
+        selectInput("tipo_asentamiento", "Tipo de asentamiento humano", choices = c("Aeropuerto", "Ampliación", "Barrio", "Cantón","Ciudad","Granja", "Hacienda")),
+        textInput("nombre_asentamiento", "Nombre del asentamiento humano"),
+        textInput("codigo_postal", "Código Postal"),
+        selectInput("entidad_federativa", "Entidad Federativa", choices = c("Guadalajara", "Baja California", "Nicaragua", "Yucatán","Chihuahua","Se ignora")),
+        dateInput("fecha de la defunción", "Fecha de la defunción"),
+        textInput("Hora de la defunción", "Hora de la defunción"),
+        selectInput("¿Tuvo atención Médica durante la enfermedad o Lesión antes de la muerte?", "¿Tuvo atención Médica durante la enfermedad o Lesión antes de la muerte?", choices = c("Si", "No", "Se ignora")),
+        selectInput("¿Se realizó una cirugía en las últimas 4 semanas?", "¿Se realizó una cirugía en las últimas 4 semanas?", choices = c("Si", "No", "Se ignora")),
+        dateInput("fecha de la cirugía", "Fecha de la cirugía"),
+        selectInput("¿Fue defuncion Accidental o violenta?", "¿Fue defuncion Accidental o violenta", choices = c("Si", "No", "Se ignora")),
+        selectInput("Tipo de defunción", "Tipo de defunción", choices = c("Enfermedad", "Accidente", "Agreción", "Lesiones autoinflingidas","Intervención legal","Se ignora")),
+        textInput("causa_basica_defuncion_a", "causa_basica_defuncion_a",),
+        textInput("intervalo_defuncion_a", "Intervalo aproximado entre el inicio de la enfermedad y la defunción"),
+        textInput("causa_defuncion_b", "causa_defuncion_b"),
+        textInput("intervalo_defuncion_b", "Intervalo aproximado entre el inicio de la enfermedad y la defunción"),
+        textInput("causa_defuncion_c", "causa_defuncion_c"),
+        textInput("intervalo_defuncion_c", "Intervalo aproximado entre el inicio de la enfermedad y la defunción"),
+        textInput("causa_defuncion_d", "causa_defuncion_d"),
+        textInput("Intervalo aproximado entre el inicio de la enfermedad y la defunción", "Intervalo aproximado entre el inicio de la enfermedad y la defunción"),
+        selectInput("¿Se practicó Necropsia?", "¿Se practicó Necropsia?", choices = c("Si", "No", "Se ignora")),
+        selectInput("Si la defunción corresponde a una mujer de 10 a 54 año especifique si la muerte ocurrio durante", "Si la defunción corresponde a una mujer de 10 a 54 año especifique si la muerte ocurrio durante", choices = c("El embarazo", "El parto", "El puerperio","43 a 11 meses despues del parto o aborto","No estuvo embarazada")),
+        selectInput("¿Las causas anotadas  fueron complicaciones propioas del embarazo parto o puerperio?", "¿Las causas anotadas  fueron complicaciones propioas del embarazo parto o puerperio", choices = c("Si", "No")),
+        selectInput("¿Las causas anotadas complicaron el embarazo parto o puerperio?", "¿Las causas anotadas complicaron el embarazo parto o puerperio?", choices = c("Si", "No")),
+        selectInput("¿La(el) fallecido presento muerte encefálica?", "¿La(el) fallecido presento muerte encefálica?", choices = c("Si", "No")),
+        selectInput("¿Fue donadora de órganos?", "¿Fue donadora de órganos?", choices = c("Si", "No")),
+        selectInput("4. Datos de Muerte Accidental o Violenta", "4. Datos de Muerte Accidental o Violenta", choices = NULL),
+        selectInput("¿Ocurrió en el desempeño de su trabajo?", "¿Ocurrió en el desempeño de su trabajo?", choices = c("Si", "No", "Se ignora")),
+        selectInput("Describa brevemente la situación, circunstancia o motivos en que se produjo la causa externa", "Describa brevemente la situación, circunstancia o motivos en que se produjo la causa externa", choices = c("Investigación pendiente", "No puede determinarse")),
+        textInput("Domicilio dónde ocurrio la lesión", "Domicilio dónde ocurrio la lesión"),
+        textInput("Tipo de vialidad", "Tipo de Vialidad"),
+        textInput("Nombre de la vialidad", "Nombre de la Vialidad"),
+        textInput("numero_exterior", "Número Exterior"),
+        textInput("numero_interior", "Número Interior"),
+        selectInput("tipo_asentamiento", "Tipo de asentamiento humano", choices = c("Aeropuerto", "Ampliación", "Barrio", "Cantón","Ciudad","Granja", "Hacienda")),
+        textInput("nombre_asentamiento", "Nombre del asentamiento humano"),
+        textInput("codigo_postal", "Código Postal"),
+        selectInput("entidad_federativa", "Entidad Federativa", choices = c("Guadalajara", "Baja California", "Nicaragua", "Yucatán","Chihuahua","Se ignora")),
+        h4("5. Datos de la (del) Certificante"),
+        selectInput("Certificada por", "Certificada por", choices = c("Medica/o tratante", "Medica/o Legista", "Otro Medica/o", "Persona autorizada por la Secretaría de Salud","","Autoridad civil", "Especifique")),
+        textInput("Especifique", "Especifique"),
+        textInput("nombre_", "Nombres"),   
+        textInput("apellido_paterno", "apellido_paterno"), 
+        textInput("apellido_materno", "apellido_materno"), 
+        textInput("número_de_cedula_profesional", "Número de cédula profesional"),
+        textInput("Domicilio y telefono", "Domicilio y telefono"),
+        textInput("Tipo de vialidad", "Tipo de Vialidad"),
+        textInput("Nombre de la vialidad", "Nombre de la Vialidad"),
+        textInput("numero_exterior", "Número Exterior"),
+        textInput("numero_interior", "Número Interior"),
+        selectInput("tipo_asentamiento", "Tipo de asentamiento humano", choices = c("Aeropuerto", "Ampliación", "Barrio", "Cantón","Ciudad","Granja", "Hacienda")),
+        textInput("nombre_asentamiento", "Nombre del asentamiento humano"),
+        textInput("codigo_postal", "Código Postal"),
+        selectInput("entidad_federativa", "Entidad Federativa", choices = c("Guadalajara", "Baja California", "Nicaragua", "Yucatán", "Chihuahua", "Se ignora")),
+        textInput("telefono", "Teléfono"),
+        dateInput("fecha_de_certificacion","Fecha de certificación"),
+        h4("6. Datos del Registro Civil"),
+        textInput("La defuncion fue incrita en la oficialia o juzgado", "La defuncion fue incrita en la oficialia o juzgado"),
+        textInput("Número de Libro", "Número de Libro"),
+      )
+    })
+  })
+  
+  observeEvent(input$confirmar, {
+    output$certificado_final <- renderUI({
+      tagList(
+        h3("Certificado de Defunción Generado"),
+        img(src = "logo.jpeg", height = "400px"),
+        h4("Certificado completado para: ", input$nombre_fallecido),
+        h4("Fecha de defunción: ", input$fecha_defuncion),
+        h4("Hora de defunción: ", input$hora_defuncion)
+      )
+    })
+  })
+}
+
+# Ejecutar aplicación sin referencias a rsconnect
+shinyApp(ui = ui, server = server)
